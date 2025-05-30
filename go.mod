@@ -1,4 +1,4 @@
-module github.com/LEOTG7/SimpleGo/new/main
+module github.com/LEOTG7/SimpleGo
 
 go 1.22.5
 
