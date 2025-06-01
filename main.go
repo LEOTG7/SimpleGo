@@ -11,6 +11,10 @@ import (
 )
 
 func main() {
+	err := godotenv.Load(".env") // config.env is supported bcuz other repos use it for some reason
+	if err != nil {
+		fmt.Println("ERROR: load variables from .env file failed", err)
+	}
 	defer func() {
 		if r := recover(); r != nil {
 			// Print reason for panic + stack for some sort of helpful log output
@@ -27,3 +31,13 @@ func main() {
 
 		http.ListenAndServe(":"+config.Port, nil)
 	}()
+	
+	botToken := opts.BotToken
+	if s := os.Getenv("BOT_TOKEN"); s != "" {
+		botToken = s
+	}
+	bot, err := gotgbot.NewBot(botToken, &gotgbot.BotOpts{})
+	if err != nil {
+		logger.Fatal("create bot failed", zap.Error(err))
+	}
+
