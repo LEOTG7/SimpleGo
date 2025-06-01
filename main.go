@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/LEOTG7/SimpleGo/plugins"
+	"github.com/LEOTG7/SimpleGo/Config"
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 )
