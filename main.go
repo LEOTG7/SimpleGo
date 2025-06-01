@@ -1,43 +1,59 @@
 package main
 
 import (
-       "fmt"
-       "net/http"
-       "runtime/debug"
-       "time"
+	"fmt"
+	"net/http"
+	"runtime/debug"
+	"time"
 
-       "github.com/LEOTG7/SimpleGo/plugins"
-
+	"github.com/LEOTG7/SimpleGo/plugins"
+	"github.com/PaulSonOfLars/gotgbot/v2"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 )
 
 func main() {
-	err := godotenv.Load(".env") // config.env is supported bcuz other repos use it for some reason
-	if err != nil {
-		fmt.Println("ERROR: load variables from .env file failed", err)
-	}
+	// Recover from panics and log the error + stack trace
 	defer func() {
 		if r := recover(); r != nil {
-			// Print reason for panic + stack for some sort of helpful log output
-			fmt.Println(r)
+			fmt.Println("Recovered from panic:", r)
 			fmt.Println(string(debug.Stack()))
 		}
 	}()
 
-	
-       go func() {
+	// Web server for uptime pings (e.g., Koyeb, Render)
+	go func() {
 		http.HandleFunc("/", func(w http.ResponseWriter, _ *http.Request) {
-			fmt.Fprintf(w, "Hi Hi")
+			fmt.Fprint(w, "Bot is running!")
 		})
-
-		http.ListenAndServe(":"+config.Port, nil)
+		_ = http.ListenAndServe(":"+config.Port, nil)
 	}()
-	
-	botToken := opts.BotToken
-	if s := os.Getenv("BOT_TOKEN"); s != "" {
-		botToken = s
-	}
-	bot, err := gotgbot.NewBot(botToken, &gotgbot.BotOpts{})
-	if err != nil {
-		logger.Fatal("create bot failed", zap.Error(err))
+
+	if config.BotToken == "" {
+		panic("No BOT_TOKEN provided")
 	}
 
+	bot, err := gotgbot.NewBot(config.BotToken, nil)
+	if err != nil {
+		panic("Failed to create bot: " + err.Error())
+	}
+
+	// To make sure no other instance of the bot is running
+	_, err = bot.GetUpdates(&gotgbot.GetUpdatesOpts{})
+	if err != nil {
+		fmt.Println("Waiting 10s because: " + err.Error())
+		time.Sleep(10 * time.Second)
+	}
+
+	updater := ext.NewUpdater(plugins.Dispatcher, nil)
+
+	err = updater.StartPolling(bot, &ext.PollingOpts{
+		DropPendingUpdates: true,
+	})
+	if err != nil {
+		panic("Failed to start polling: " + err.Error())
+	}
+
+	fmt.Printf("@%s started.\n", bot.User.Username)
+
+	updater.Idle()
+}
