@@ -19,7 +19,6 @@ func HandleEditTextCallback(bot *gotgbot.Bot, ctx *gotgbot.Context) error {
 		fmt.Println("Failed to edit message text:", err)
 		return err
 	}
-package plugins
 	_, err = ctx.CallbackQuery.Answer(bot, nil)
 	if err != nil {
 		fmt.Println("Failed to answer callback query:", err)
