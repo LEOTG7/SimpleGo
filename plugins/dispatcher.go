@@ -20,4 +20,5 @@ var Dispatcher = ext.NewDispatcher(&ext.DispatcherOpts{
 
 func init() {
 	Dispatcher.AddHandlerToGroup(handlers.NewCommand("start", Start), basicCommandsGroup)
+	Dispatcher.AddHandlerToGroup(handlers.NewCallback("clicked", HandleEditTextCallback), basicCommandsGroup)
 }
